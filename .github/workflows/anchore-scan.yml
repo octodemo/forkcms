@@ -38,13 +38,16 @@ jobs:
             security-events: write
         steps:
             - uses: actions/checkout@v4
-            - name: Build image
-              run: docker build -t forkcms:scan .
+            # The Dockerfile's apt step no longer builds (Debian 11 mirrors 404),
+            # so scan its base image, which carries the PHP runtime and OS packages.
+            - name: Resolve base image from Dockerfile
+              id: base
+              run: echo "image=$(awk 'toupper($1)=="FROM"{print $2; exit}' Dockerfile)" >> "$GITHUB_OUTPUT"
             - name: Scan image (php runtime + OS packages)
               id: scan
               uses: anchore/scan-action@v7
               with:
-                  image: forkcms:scan
+                  image: ${{ steps.base.outputs.image }}
                   fail-build: false
                   severity-cutoff: high
                   output-format: sarif
