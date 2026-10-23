@@ -1,0 +1,59 @@
+name: trivy-scan
+on:
+    push:
+        branches: [master, main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    scan-filesystem:
+        name: Trivy filesystem scan
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            security-events: write
+        steps:
+            - uses: actions/checkout@v4
+            - name: Scan source
+              uses: aquasecurity/trivy-action@v0.36.0
+              with:
+                  scan-type: fs
+                  scan-ref: .
+                  format: sarif
+                  output: trivy-fs.sarif
+                  severity: CRITICAL,HIGH
+                  exit-code: "0"
+            - name: Upload SARIF
+              if: always()
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                  sarif_file: trivy-fs.sarif
+                  category: trivy-filesystem
+
+    scan-image:
+        name: Trivy container image scan
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            security-events: write
+        steps:
+            - uses: actions/checkout@v4
+            - name: Resolve base image from Dockerfile
+              id: base
+              run: echo "image=$(awk 'toupper($1)=="FROM"{print $2; exit}' Dockerfile)" >> "$GITHUB_OUTPUT"
+            - name: Scan image
+              uses: aquasecurity/trivy-action@v0.36.0
+              with:
+                  image-ref: ${{ steps.base.outputs.image }}
+                  format: sarif
+                  output: trivy-image.sarif
+                  severity: CRITICAL,HIGH
+                  exit-code: "0"
+            - name: Upload SARIF
+              if: always()
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                  sarif_file: trivy-image.sarif
+                  category: trivy-image
