@@ -302,8 +302,7 @@ class ModuleInstaller
                  FROM modules_settings
                  WHERE module = ? AND name = ?',
                 [$module, $name]
-            ),
-            ['allowed_classes' => false]
+            )
         );
     }
 

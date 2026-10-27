@@ -267,8 +267,7 @@ class Model
                  FROM profiles_settings AS ps
                  WHERE ps.profile_id = ? AND ps.name = ?',
                 [$id, $name]
-            ),
-            ['allowed_classes' => false]
+            )
         );
     }
 
