@@ -188,7 +188,8 @@ class ModulesSettings
         $groupedSettings = [];
         foreach ($settings as $row) {
             $groupedSettings[$row['module']][$row['name']] = unserialize(
-                $row['value']
+                $row['value'],
+                ['allowed_classes' => false]
             );
         }
 

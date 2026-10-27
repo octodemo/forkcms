@@ -148,7 +148,7 @@ class Navigation extends KernelLoader
 
             // if data
             if (isset($data['data'])) {
-                $data['data'] = unserialize($data['data']);
+                $data['data'] = unserialize($data['data'], ['allowed_classes' => false]);
             }
 
             // add
